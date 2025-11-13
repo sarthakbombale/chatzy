@@ -9,7 +9,8 @@ backend/.env
 frontend/.env
 
 # Build/dist folders
-frontend/dist/
+# Commented out temporarily to include frontend build
+# frontend/dist/
 backend/dist/
 
 # Logs
