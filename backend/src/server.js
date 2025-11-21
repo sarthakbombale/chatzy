@@ -20,7 +20,7 @@ app.use(cookieParser())
 
 // API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/message", messageRoutes);
+app.use("/api/messages", messageRoutes);
 
 // -----------------------------
 // ⭐ ALWAYS SERVE FRONTEND BUILD
