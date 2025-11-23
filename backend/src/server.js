@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser"
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { connectDB } from "./lib/db.js";
+import cors from "cors";
 
 dotenv.config();
 
@@ -15,7 +16,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
- app.use(express.json());  
+app.use(express.json());
+app.use(cors({ origin: ENV.CLIENT_URL, credential: true }))
 app.use(cookieParser())
 
 // API Routes
