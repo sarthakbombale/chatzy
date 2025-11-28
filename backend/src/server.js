@@ -22,6 +22,7 @@ app.use(cors({
     credentials: true
 }));
 
+// app.use(cookieParser());  
 
 // API Routes
 app.use("/api/auth", authRoutes);
