@@ -4,7 +4,7 @@ import ChatContainer from '../components/ChatContainer';
 import ContactList from '../components/ContactList';
 import ProfileHeader from '../components/ProfileHeader';
 import ChatsList from '../components/ChatsList';
-import NoConversationPlaceholder from '../components/NoConversationPlaceholder.JSX';
+import NoConversationPlaceholder from "../components/NoConversationPlaceholder.jsx";
 import { useChatStore } from '../store/useChatStore';
 
 function ChatPage() {
