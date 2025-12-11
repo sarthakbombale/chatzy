@@ -4,7 +4,8 @@ import useChatStore from "../store/useChatStore.js"
 import ChatHeader from "./ChatHeader";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
-import IsMessagesLoadingSkeleton from "./IsMessagesLoadingSkeleton";
+import IsMessagesLoadingSkeleton from "./isMessagesLoadingSkeleton.jsx"
+
 
 function ChatContainer() {
   const { selectedUser, getMessagesByUserId, message = [], isMessagesLoading } = useChatStore();
