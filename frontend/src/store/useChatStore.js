@@ -32,6 +32,7 @@ export const useChatStore = create((set, get) => ({
       set({ isUsersLoading: false });
     }
   },
+
   getMyChatPartners: async () => {
     set({ isUsersLoading: true });
     try {
@@ -57,7 +58,7 @@ export const useChatStore = create((set, get) => ({
   },
 
   sendMessage: async (messageData) => {
-    const { selectedUser, messages } = get();
+    const { selectedUser } = get();
     const { authUser } = useAuthStore.getState();
 
     const tempId = `temp-${Date.now()}`;
@@ -69,17 +70,31 @@ export const useChatStore = create((set, get) => ({
       text: messageData.text,
       image: messageData.image,
       createdAt: new Date().toISOString(),
-      isOptimistic: true, // flag to identify optimistic messages (optional)
+      isOptimistic: true,
     };
-    // immidetaly update the ui by adding the message
-    set({ messages: [...messages, optimisticMessage] });
+
+    // immediately update UI
+    set((state) => ({
+      messages: [...state.messages, optimisticMessage],
+    }));
 
     try {
-      const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
-      set({ messages: messages.concat(res.data) });
+      const res = await axiosInstance.post(
+        `/messages/send/${selectedUser._id}`,
+        messageData
+      );
+
+      // ✅ FIX: use latest state, remove optimistic message
+      set((state) => ({
+        messages: state.messages
+          .filter((msg) => !msg.isOptimistic)
+          .concat(res.data),
+      }));
     } catch (error) {
-      // remove optimistic message on failure
-      set({ messages: messages });
+      // rollback on failure
+      set((state) => ({
+        messages: state.messages.filter((msg) => !msg.isOptimistic),
+      }));
       toast.error(error.response?.data?.message || "Something went wrong");
     }
   },
@@ -91,17 +106,20 @@ export const useChatStore = create((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+      const isMessageSentFromSelectedUser =
+        newMessage.senderId === selectedUser._id;
       if (!isMessageSentFromSelectedUser) return;
 
-      const currentMessages = get().messages;
-      set({ messages: [...currentMessages, newMessage] });
+      set((state) => ({
+        messages: [...state.messages, newMessage],
+      }));
 
       if (isSoundEnabled) {
         const notificationSound = new Audio("/sounds/notification.mp3");
-
-        notificationSound.currentTime = 0; // reset to start
-        notificationSound.play().catch((e) => console.log("Audio play failed:", e));
+        notificationSound.currentTime = 0;
+        notificationSound.play().catch((e) =>
+          console.log("Audio play failed:", e)
+        );
       }
     });
   },
