@@ -14,17 +14,21 @@ export const useAuthStore = create((set, get) => ({
   onlineUsers: [],
 
   checkAuth: async () => {
-    try {
-      const res = await axiosInstance.get("/auth/check");
-      set({ authUser: res.data });
-      get().connectSocket();
-    } catch (error) {
+  try {
+    const res = await axiosInstance.get("/auth/check");
+    set({ authUser: res.data });
+    get().connectSocket();
+  } catch (error) {
+    // Only log real server errors, ignore 401 (not logged in)
+    if (error.response?.status !== 401) {
       console.log("Error in authCheck:", error);
-      set({ authUser: null });
-    } finally {
-      set({ isCheckingAuth: false });
     }
-  },
+    set({ authUser: null });
+  } finally {
+    set({ isCheckingAuth: false });
+  }
+},
+
 
   signup: async (data) => {
     set({ isSigningUp: true });
