@@ -1,9 +1,8 @@
 import axios from "axios";
 
+const isDev = window.location.hostname === "localhost";
+
 export const axiosInstance = axios.create({
-  baseURL:
-    import.meta.env.MODE === "development"
-      ? "http://localhost:3000/api"
-      : "/api",
+  baseURL: isDev ? "http://localhost:3000/api" : "/api",
   withCredentials: true,
 });
