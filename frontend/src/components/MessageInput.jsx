@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import useKeyboardSound from "../hooks/useKeyboardSound.js";
 import { useChatStore } from "../store/useChatStore.js";
-import toast from "react-hot-toast";
-import { ImageIcon, ImagesIcon, SendIcon, XIcon } from "lucide-react";
+import { ImagesIcon, SendIcon, XIcon } from "lucide-react";
+
 
 function MessageInput() {
   const { playRandomKeyStrokeSound } = useKeyboardSound();
@@ -15,86 +15,45 @@ function MessageInput() {
     e.preventDefault();
     if (!text.trim() && !imagePreview) return;
     if (isSoundEnabled) playRandomKeyStrokeSound();
-
-    sendMessage({
-      text: text.trim(),
-      image: imagePreview,
-    });
-
+    sendMessage({ text: text.trim(), image: imagePreview });
     setText("");
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result);
-    reader.readAsDataURL(file);
-  };
-
-  const removeImage = () => {
-    setImagePreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   return (
-    <div className="p-4 border-t border-slate-700/50">
+    <div className="p-2 md:p-4 border-t border-slate-700/50">
       {imagePreview && (
-        <div className="max-w-3xl mx-auto mb-3 flex items-center">
+        <div className="mb-3 flex items-center px-2">
           <div className="relative">
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border border-slate-700"
-            />
-            <button
-              onClick={removeImage}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-slate-200 hover:bg-slate-700"
-              type="button"
-            >
+            <img src={imagePreview} alt="Preview" className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg" />
+            <button onClick={() => setImagePreview(null)} className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-white">
               <XIcon className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex space-x-4">
+      <form onSubmit={handleSendMessage} className="flex items-center space-x-2 md:space-x-4">
         <input
           type="text"
           value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            isSoundEnabled && playRandomKeyStrokeSound();
-          }}
-         className="flex-1 bg-slate-800/50 text-white caret-white placeholder-slate-400 border border-slate-700/50 rounded-lg py-2 px-4"
-          placeholder="Type your message..."
+          onChange={(e) => { setText(e.target.value); isSoundEnabled && playRandomKeyStrokeSound(); }}
+          className="flex-1 bg-slate-800/50 text-white placeholder-slate-400 border border-slate-700/50 rounded-lg py-2 px-3 md:px-4 text-sm md:text-base focus:outline-none"
+          placeholder="Type..."
         />
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          onChange={handleImageChange}
-          className="hidden"
-        />
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-4 transition-colors ${
-            imagePreview ? "text-cyan-500" : ""
-          }`}
-        >
+        <input type="file" accept="image/*" ref={fileInputRef} onChange={(e) => {
+           const file = e.target.files[0];
+           const reader = new FileReader();
+           reader.onloadend = () => setImagePreview(reader.result);
+           reader.readAsDataURL(file);
+        }} className="hidden" />
+        
+        <button type="button" onClick={() => fileInputRef.current?.click()} className="text-slate-400 hover:text-cyan-500">
           <ImagesIcon className="w-5 h-5" />
         </button>
-        <button
-          type="submit"
-          disabled={!text.trim() && !imagePreview}
-          className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg px-4 py-2 font-medium hover:from-cyan-600 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+
+        <button type="submit" disabled={!text.trim() && !imagePreview} className="bg-cyan-500 text-white p-2 md:px-4 md:py-2 rounded-lg disabled:opacity-50">
           <SendIcon className="w-5 h-5" />
         </button>
       </form>
