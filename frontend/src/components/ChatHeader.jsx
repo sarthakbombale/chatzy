@@ -9,7 +9,7 @@ function ChatHeader() {
 
   if (!selectedUser) return null;
 
-  const isOnline = onlineUsers?.includes(selectedUser._id);
+  const isOnline = selectedUser?._id === "ai-bot" || onlineUsers.includes(selectedUser?._id);
 
   useEffect(() => {
     const handleEscKey = (event) => {

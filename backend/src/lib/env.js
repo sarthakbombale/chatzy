@@ -18,4 +18,5 @@ export const ENV = {
 
   ARCJECT_KEY: process.env.ARCJECT_KEY,
   ARCJECT_ENV: process.env.ARCJECT_ENV,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 };
