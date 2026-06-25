@@ -2,6 +2,7 @@ import Message from "../models/Message.js";
 import User from "../models/User.js";
 import cloudinary from "../lib/cloudinary.js";
 import { io, getReceiverSocketId } from "../lib/scoket.js";
+import { getBotResponse } from "../lib/geminiService.js";
 
 export const getAllContacts = async (req, res) => {
     try {
@@ -19,6 +20,23 @@ export const getMessageByUserId = async (req, res) => {
     try {
         const myId = req.user._id;
         const { id: userToChatId } = req.params;
+
+        if (userToChatId === "ai-bot") {
+            return res.status(200).json([{
+                _id: "welcome-ai",
+                senderId: "ai-bot",
+                receiverId: myId,
+                text: "Hello! I am your Chatzy-AI assistant. How can I help you today?",
+                createdAt: new Date().toISOString()
+            }]);
+        }
+
+        const messages = await Message.find({
+            $or: [
+                { senderId: myId, receiverId: userToChatId },
+                { senderId: userToChatId, receiverId: myId }
+            ]
+        })
 
         const message = await Message.find({
             $or: [
@@ -38,15 +56,35 @@ export const getMessageByUserId = async (req, res) => {
 export const sendMessage = async (req, res) => {
     try {
         const { text, image } = req.body;
-        const { id: receiverId } = req.params;
+        const { id: receiverId } = req.params; // This is "ai-bot"
         const senderId = req.user._id;
 
         if (!text && !image) {
             return res.status(400).json({ message: "Text or image is required." });
         }
+
+        // 🤖 1. INTERCEPT CHATBOT HTTP REQUESTS IMMEDIATELY
+        if (receiverId === "ai-bot") {
+            const botReplyText = await getBotResponse(text);
+
+            // B. Construct the response payload using your schema's fields
+            const botMessageResponse = {
+                _id: `msg-bot-${Date.now()}`,
+                senderId: "ai-bot",             // The bot is the sender of this returned message
+                receiverId: senderId.toString(), // You are the receiver
+                text: botReplyText,
+                image: null,
+                createdAt: new Date().toISOString(),
+            };
+            // Return 201 created status instantly to clear the front-end optimistic state
+            return res.status(201).json(botMessageResponse);
+        }
+
+        // These are now completely safe because "ai-bot" strings are handled above!
         if (senderId.equals(receiverId)) {
             return res.status(400).json({ message: "Cannot send messages to yourself." });
         }
+
         const receiverExists = await User.exists({ _id: receiverId });
         if (!receiverExists) {
             return res.status(404).json({ message: "Receiver not found." });

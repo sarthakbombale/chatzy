@@ -84,18 +84,30 @@ export const useChatStore = create((set, get) => ({
         messageData
       );
 
-      // ✅ FIX: use latest state, remove optimistic message
-      set((state) => ({
-        messages: state.messages
-          .filter((msg) => !msg.isOptimistic)
-          .concat(res.data),
-      }));
+      set((state) => {
+        // Remove the temporary optimistic item
+        const cleanedMessages = state.messages.filter((msg) => !msg.isOptimistic);
+
+        if (selectedUser._id === "ai-bot") {
+          // 🤖 For the bot: Re-insert your original text manually, THEN append the AI response!
+          const userMessage = {
+            _id: `msg-user-${Date.now()}`,
+            senderId: authUser._id,
+            receiverId: "ai-bot",
+            text: messageData.text,
+            createdAt: new Date().toISOString(),
+          };
+          return { messages: [...cleanedMessages, userMessage, res.data] };
+        } else {
+          // Normal user behavior
+          return { messages: cleanedMessages.concat(res.data) };
+        }
+      });
     } catch (error) {
-      // rollback on failure
+      toast.error(error.response?.data?.message || "Failed to send message");
       set((state) => ({
         messages: state.messages.filter((msg) => !msg.isOptimistic),
       }));
-      toast.error(error.response?.data?.message || "Something went wrong");
     }
   },
 
