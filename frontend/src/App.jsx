@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { Route, Routes, Navigate } from "react-router-dom";
 import ChatPage from './pages/ChatPage';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import { useAuthStore } from './store/useAuthStore';
@@ -17,17 +18,18 @@ function App() {
   if (isCheckingAuth) return <PageLoader />
 
   return (
-    // FIXED: Removed p-4 on mobile (p-0) and added it back for tablets/desktop (md:p-4)
-    <div className="min-h-screen bg-slate-900 relative flex items-center justify-center p-0 md:p-4 overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px]" />
-      <div className="absolute top-0 -left-4 size-96 bg-pink-500 opacity-20 blur-[100px]" />
-      <div className="absolute bottom-0 -right-4 size-96 bg-cyan-500 opacity-20 blur-[100px]" />
+    <div className="min-h-screen bg-slate-900 relative flex items-center justify-center overflow-x-hidden">
+      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px]" />
+      <div className="absolute top-0 -left-4 size-96 pointer-events-none bg-pink-500 opacity-20 blur-[100px]" />
+      <div className="absolute bottom-0 -right-4 size-96 pointer-events-none bg-cyan-500 opacity-20 blur-[100px]" />
 
-      <Routes>
-        <Route path="/" element={authUser ? <ChatPage /> : <Navigate to={"/login"} />} />
-        <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to={"/"} />} />
-        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to={"/"} />} />
-      </Routes>
+      <div className="relative z-10 w-full min-h-screen flex items-center justify-center">
+        <Routes>
+          <Route path="/" element={authUser ? <ChatPage /> : <LandingPage />} />
+          <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to={"/"} />} />
+          <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to={"/"} />} />
+        </Routes>
+      </div>
       <Toaster />
     </div>
   )
